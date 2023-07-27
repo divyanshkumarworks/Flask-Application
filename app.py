@@ -35,7 +35,18 @@ def search_user(id):
 @app.route("/users/<id>", methods=["DELETE"])
 def delete_user(id):
 	user = Profile.delete_one({"_id": int(id)})
-	return jsonify("user deleted sucessfully") 
+	return jsonify("user deleted sucessfully")
+
+@app.route("/users/<id>", methods=["PUT"])
+def update_user(id):
+	json = request.json
+	id = int(id)
+	name = json["name"]
+	email = json["email"]
+	password = json["password"]
+	if request.method == "PUT" and id and name and email and password:
+		Profile.update_one({"_id": id}, {"$set":{"name": name, "email": email, "password": password}})
+		return jsonify("user updated sucessfully")
 
 if __name__ == "__main__":
 	app.run(debug=True)
