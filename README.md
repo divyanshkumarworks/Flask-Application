@@ -1,7 +1,20 @@
 # Flask-Application
 
-First, to install all dependencies:
-```
+## Installation
+1. Clone this repository
+ ```bash
+ https://github.com/divyanshkumarworks/Blogging-Portal.git
+ ```
+2. Create Virtual Environment
+ ```bash
+ python -m venv venv
+ ```
+3. Activate the environment
+ ```bash
+ source /venv/bin/activate
+ ``` 
+First, install all dependencies:
+```bash
 python -m pip install -r requirements.txt
 ```
 
@@ -15,4 +28,4 @@ If you reject to me, this:
 py app.py
 ```
 
-Obviusly, make sure you have ```mongod``` running on.
+Obviously, make sure you have ```Mongodb service``` isntalled and running on.
