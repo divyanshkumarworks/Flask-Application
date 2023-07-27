@@ -3,7 +3,7 @@
 ## Installation
 1. Clone this repository
  ```bash
- https://github.com/divyanshkumarworks/Blogging-Portal.git
+ https://github.com/divyanshkumarworks/Flask-Application.git
  ```
 2. Create Virtual Environment
  ```bash
