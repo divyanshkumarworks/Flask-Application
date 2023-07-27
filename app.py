@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 from pymongo import MongoClient
 from bson.json_util import dumps
+from bson.objectid import ObjectId
 
 app = Flask(__name__)
 
@@ -26,6 +27,10 @@ def users():
 	users = Profile.find()
 	return dumps(users)
 
+@app.route("/users/<id>")
+def search_user(id):
+	user = Profile.find_one({"_id": int(id)})
+	return dumps(user)
 
 if __name__ == "__main__":
 	app.run(debug=True)
