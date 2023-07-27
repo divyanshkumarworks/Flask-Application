@@ -32,6 +32,11 @@ def search_user(id):
 	user = Profile.find_one({"_id": int(id)})
 	return dumps(user)
 
+@app.route("/users/<id>", methods=["DELETE"])
+def delete_user(id):
+	user = Profile.delete_one({"_id": int(id)})
+	return jsonify("user deleted sucessfully") 
+
 if __name__ == "__main__":
 	app.run(debug=True)
 	
