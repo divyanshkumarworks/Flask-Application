@@ -25,7 +25,7 @@ Follow these instructions to get a copy of the project up and running on your lo
  ```bash
  https://github.com/divyanshkumarworks/Flask-Application.git
  ```
-2. cd into Flask-Application
+2. go inside clone folder
  ```bash
  cd Flask-Application
 ```
