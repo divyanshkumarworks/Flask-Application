@@ -25,20 +25,24 @@ Follow these instructions to get a copy of the project up and running on your lo
  ```bash
  https://github.com/divyanshkumarworks/Flask-Application.git
  ```
-2. Create a Virtual Environment
+2. cd into Flask-Application
+ ```bash
+ cd Flask-Application
+```
+3. Create a Virtual Environment
  ```bash
  python -m venv venv
  ```
-3. Activate the environment
+4. Activate the environment
  ```bash
  source /venv/bin/activate
  ``` 
-4. install all dependencies:
+5. install all dependencies:
 ```bash
 python -m pip install -r requirements.txt
 ```
 
-5. Run the Flask application.
+6. Run the Flask application.
 ```bash
 python app.py
 ```
