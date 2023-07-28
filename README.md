@@ -3,6 +3,11 @@
 ## About
 This project demonstrates a simple Flask application that integrates with MongoDB to provide a RESTful API for performing CRUD (Create, Read, Update, Delete) operations on a collection of resources.
 
+## Demo
+
+![Demo](https://github.com/divyanshkumarworks/Flask-Application/assets/134360630/0e91c1e4-2183-4f03-b1e3-1e757187b116)
+
+
 ## Getting Started: 🚀
 
 ### Prerequisites 📋
