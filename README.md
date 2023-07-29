@@ -54,11 +54,11 @@ Obviously, make sure you have ```Mongodb service``` installed and running on you
 
 The following API endpoints are available:
 
-1. POST /resources: Create a new resource. (Request body should contain the resource data in JSON format.)
-2. GET /resources: Fetch all resources from the database.
-3. GET /resources/<id>: Fetch a specific resource by its unique identifier (ID).
-4. DELETE /resources/<id>: Delete a resource with the specified ID.
-5. PUT /resources/<id>: Update an existing resource identified by its ID. (Request body should contain the updated resource data in JSON format.)
+1. `POST /users` Create a new user. (Request body should contain the resource data in JSON format.)
+2. `GET /users` Fetch all users from the database.
+3. `GET /users/<id>` Fetch a specific user by its unique identifier (ID).
+4. `DELETE /users/<id>` Delete a user with the specified ID.
+5. `PUT /users/<id>` Update an existing user identified by its ID. (Request body should contain the updated resource data in JSON format.)
 
 ## Acknowledgments
 Special thanks to the Flask and MongoDB communities for their excellent documentation and resources.
