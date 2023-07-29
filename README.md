@@ -48,7 +48,7 @@ python app.py
 ```
 The application will be accessible at http://localhost:5000.
 
-Obviously, make sure you have ```Mongodb service``` installed and running on your pc. you can do this by downloading the community server from the MongoDB official website here: [https://www.mongodb.com/try/download/community](https://www.mongodb.com/try/download/community)
+**Note**: This project need a ```Mongodb atlas``` account for accessing the database. you can create your MongoDB atlas account in official MongoDB website here: [https://www.mongodb.com/basics/mongodb-atlas-tutorial](https://www.mongodb.com/basics/mongodb-atlas-tutorial)
 
 ## API Endpoints
 
