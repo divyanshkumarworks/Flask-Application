@@ -6,8 +6,9 @@ import re
 
 app = Flask(__name__)
 
-app.config["MONGO_URI"] = "mongodb://localhost:27017/Users"
-mongo = PyMongo(app)
+client = MongoClient("mongodb+srv://johnybravo2404:%40bcd1234@cluster0.ikxf9ss.mongodb.net/?retryWrites=true&w=majority")
+users = client["Users"]
+profile = users["profile"]
 
 email_fromat = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
 
@@ -18,7 +19,7 @@ def create_new_user():
 	name = json["name"]
 	email = json["email"]
 	password = json["password"]
-	if mongo.db.profile.find_one({"_id": int(id)}):
+	if profile.find_one({"_id": int(id)}):
 		return jsonify("user id already exists")
 	elif id < 0:
 		return jsonify("not a valid id no.")
@@ -29,7 +30,7 @@ def create_new_user():
 	else:
 		if request.method == "POST" and id and name and email and password:
 			post = {"_id": int(id) , "name": str(name), "email": email, "password": str(password)}
-			mongo.db.profile.insert_one(post)
+			profile.insert_one(post)
 			return jsonify("user created sucessfully")
 		else:
 			resp = jsonify({"message": "not found"})
@@ -38,12 +39,12 @@ def create_new_user():
 
 @app.route("/users")
 def users():
-	users = mongo.db.profile.find()
+	users = profile.find()
 	return dumps(users)
 
 @app.route("/users/<id>")
 def search_user(id):
-	user = mongo.db.profile.find_one({"_id": int(id)})
+	user = profile.find_one({"_id": int(id)})
 	if user:
 		return dumps(user)
 	else:
@@ -53,8 +54,8 @@ def search_user(id):
 
 @app.route("/users/<id>", methods=["DELETE"])
 def delete_user(id):
-	if mongo.db.profile.find_one({"_id": int(id)}):
-		mongo.db.profile.delete_one({"_id": int(id)})
+	if profile.find_one({"_id": int(id)}):
+		profile.delete_one({"_id": int(id)})
 		resp = jsonify("user deleted sucessfully")
 		return resp
 	else:
@@ -74,8 +75,8 @@ def update_user(id):
 	elif not (re.search('[a-zA-Z]', str(name))):
 		return jsonify("name should contain alphabets")
 	else:
-		if mongo.db.profile.find_one({"_id": int(id)}) and request.method == "PUT" and id and name and email and password:
-			mongo.db.profile.update_one({"_id": int(id)}, {"$set":{"name": name, "email": email, "password": password}})
+		if profile.find_one({"_id": int(id)}) and request.method == "PUT" and id and name and email and password:
+			profile.update_one({"_id": int(id)}, {"$set":{"name": name, "email": email, "password": password}})
 			return jsonify("user updated sucessfully")
 		else:
 			resp = jsonify({"message": "user id not found"})
@@ -83,6 +84,6 @@ def update_user(id):
 			return resp
 
 if __name__ == "__main__":
-	app.run(debug=True)
+	app.run(host="0.0.0.0", port=5000)
 	
 
