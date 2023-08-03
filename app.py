@@ -1,89 +1,104 @@
-from flask import Flask, jsonify, request
+from flask import Flask, request
+from flask_restful import Resource, Api, reqparse
 from pymongo import MongoClient
-from flask_pymongo import PyMongo
-from bson.json_util import dumps
 import re
 
-app = Flask(__name__)
-
+# Connect to MongoDB Atlas using the connection string
 client = MongoClient("mongodb+srv://johnybravo2404:%40bcd1234@cluster0.ikxf9ss.mongodb.net/?retryWrites=true&w=majority")
-users = client["Users"]
-profile = users["profile"]
+db = client["Users"]
+collection = db["profile"]
 
-email_fromat = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
+app = Flask(__name__)
+api = Api(app)
 
-@app.route("/users", methods=["POST"])
-def create_new_user():
-	json = request.json
-	id = json["id"]
-	name = json["name"]
-	email = json["email"]
-	password = json["password"]
-	if profile.find_one({"_id": int(id)}):
-		return jsonify("user id already exists")
-	elif id < 0:
-		return jsonify("not a valid id no.")
-	elif not (re.fullmatch(email_fromat, email)):
-		return jsonify("not a valid email")
-	elif not (re.search('[a-zA-Z]', str(name))):
-		return jsonify("name should contain alphabets")
-	else:
-		if request.method == "POST" and id and name and email and password:
-			post = {"_id": int(id) , "name": str(name), "email": email, "password": str(password)}
-			profile.insert_one(post)
-			return jsonify("user created sucessfully")
-		else:
-			resp = jsonify({"message": "not found"})
-			resp.status_code = 404
-			return resp
+# Custom validation functions for email, name, and password
 
-@app.route("/users")
-def users():
-	users = profile.find()
-	return dumps(users)
+def is_valid_email(email):
+    return re.match(r"[^@]+@[^@]+\.[^@]+", email)
 
-@app.route("/users/<id>")
-def search_user(id):
-	user = profile.find_one({"_id": int(id)})
-	if user:
-		return dumps(user)
-	else:
-		resp = jsonify({"message": "user not found"})
-		resp.status_code = 404
-		return resp
+def is_valid_name(name):
+    return bool(name.strip())
 
-@app.route("/users/<id>", methods=["DELETE"])
-def delete_user(id):
-	if profile.find_one({"_id": int(id)}):
-		profile.delete_one({"_id": int(id)})
-		resp = jsonify("user deleted sucessfully")
-		return resp
-	else:
-		resp = jsonify({"message": "user not found"})
-		resp.status_code = 404
-		return resp
+def is_valid_password(password):
+    return len(password) >= 6
 
+# Request parser for handling incoming data
+user_parser = reqparse.RequestParser()
+user_parser.add_argument("id", type=str)
+user_parser.add_argument("name", type=str, required=True, help="Name is required.")
+user_parser.add_argument("email", type=str, required=True, help="Email is required.")
+user_parser.add_argument("password", type=str, required=True, help="Password is required.")
 
-@app.route("/users/<id>", methods=["PUT"])
-def update_user(id):
-	json = request.json
-	name = json["name"]
-	email = json["email"]
-	password = json["password"]
-	if not (re.fullmatch(email_fromat, email)):
-		return jsonify("not a valid email")
-	elif not (re.search('[a-zA-Z]', str(name))):
-		return jsonify("name should contain alphabets")
-	else:
-		if profile.find_one({"_id": int(id)}) and request.method == "PUT" and id and name and email and password:
-			profile.update_one({"_id": int(id)}, {"$set":{"name": name, "email": email, "password": password}})
-			return jsonify("user updated sucessfully")
-		else:
-			resp = jsonify({"message": "user id not found"})
-			resp.status_code = 404
-			return resp
+# User resource
+class UserResource(Resource):
+    def get(self, user_id=None):
+        if user_id:
+            user = collection.find_one({"_id": int(user_id)})
+            if user:
+                return user, 200
+            else:
+                return {"message": "User not found"}, 404
+        else:
+            users = list(collection.find({}, {"_id": 0}))
+            return users, 200
+
+    def post(self):
+        data = user_parser.parse_args()
+
+        # Validate data
+        if not is_valid_name(data["name"]):
+            return {"message": "Invalid name"}, 400
+        if not is_valid_email(data["email"]):
+            return {"message": "Invalid email"}, 400
+        if not is_valid_password(data["password"]):
+            return {"message": "Invalid password (should be at least 6 characters)"}, 400
+
+        # Check if the id is already in use
+        existing_user = collection.find_one({"email": data["email"], "id": {"$ne": int(data["id"])}})
+        if existing_user:
+            return {"message": "Email or id already in use"}, 409
+
+        # Generate a unique ID for the new user
+        collection.insert_one({"_id": int(data["id"]), "email": data["email"], "name": data["name"], "password": data["password"]})
+
+        return data, 201
+
+    def put(self, user_id):
+        user = collection.find_one({"_id": int(user_id)})
+        if not user:
+            return {"message": "User not found"}, 404
+
+        data = user_parser.parse_args()
+
+        # Validate data
+        if not is_valid_name(data["name"]):
+            return {"message": "Invalid name"}, 400
+        if not is_valid_email(data["email"]):
+            return {"message": "Invalid email"}, 400
+        if not is_valid_password(data["password"]):
+            return {"message": "Invalid password (should be at least 6 characters)"}, 400
+
+        # Check if the updated email is already in use by another user
+        existing_user = collection.find_one({"email": data["email"], "id": {"$ne": int(user_id)}})
+        if existing_user:
+            return {"message": "Email or id already in use"}, 409
+
+        # Update the user in the database
+        collection.update_one({"id": int(user_id)}, {"$set": data})
+        data["id"] = user_id
+        return data, 200
+
+    def delete(self, user_id):
+        result = collection.delete_one({"id": int(user_id)})
+        if result.deleted_count > 0:
+            return {"message": "User deleted successfully"}, 200
+        else:
+            return {"message": "User not found"}, 404
+
+# Add the User resource to the API
+api.add_resource(UserResource, "/users", "/users/<string:user_id>")
 
 if __name__ == "__main__":
-	app.run(host="0.0.0.0", port=5000)
+    app.run(debug=True)
 	
 
